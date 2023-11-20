@@ -1,9 +1,11 @@
 from queue import Queue, Empty
 from threading import Event, Thread
 import time
-import random
+
 
 class VectorProcess:
+    """Process class that uses vector clocks"""
+
     def __init__(self, _id, n):
         self._id = _id
         self.processes = []
@@ -11,24 +13,24 @@ class VectorProcess:
         self.stop_worker = Event()
         self.message_queue = Queue()  # queue of incoming message (payload, timestamp)
         self.events_queue = Queue()  # queue of tuples: (payload, receiver_id, time)
-        self.start_time = 0
+        self.start_time: float = 0
         self.clock = [0] * n  # vector clock initialized to 0
 
-    def start_loop(self):
+    def start_loop(self) -> None:
         """Start the process loop"""
         self.start_time = time.time()
         print(f"[{time.time()-self.start_time}] Process {self._id} started")
         self.main_thread.start()
 
-    def get_process(self, _id):
+    def get_process(self, _id) -> "VectorProcess":
         """Get process object by id"""
         return self.processes[_id]
 
-    def enqueue_message(self, payload, timestamp):
+    def enqueue_message(self, payload, timestamp) -> None:
         """Enqueue message to be processed by the state machine"""
         self.message_queue.put((payload, timestamp))
 
-    def main_loop(self):
+    def main_loop(self) -> None:
         """Main loop for the process"""
         while not self.stop_worker.is_set():
             time_delta = time.time() - self.start_time
@@ -55,7 +57,7 @@ class VectorProcess:
 
         print(f"Process {self._id} stopped \n")
 
-    def receive_message(self, payload, timestamp):
+    def receive_message(self, payload, timestamp) -> None:
         """Receive message from another process"""
         self.clock[self._id] += 1
         # update clock by taking elementwise max
@@ -66,7 +68,7 @@ class VectorProcess:
             f"[{time.time()-self.start_time}] Process {self._id} received message {payload} and clock is now: {self.clock} \n"
         )
 
-    def send_message(self, payload, out_id):
+    def send_message(self, payload, out_id) -> None:
         """Send message to another process"""
         if payload == "STOP":
             self.stop_worker.set()
