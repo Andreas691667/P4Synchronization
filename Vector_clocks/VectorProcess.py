@@ -53,6 +53,8 @@ class VectorProcess:
             # Not empty
             else:
                 self.receive_message(payload, clock_in) 
+        
+        print(f"Process {self._id} stopped \n")
 
     def receive_message(self, payload, timestamp):
         """Receive message from another process"""
@@ -66,7 +68,6 @@ class VectorProcess:
     def send_message(self, payload, out_id):
         """Send message to another process"""
         if payload == "STOP":
-            print(f"Process {self._id} stopped")
             self.stop_worker.set()
             return
 

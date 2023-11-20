@@ -25,5 +25,6 @@ if __name__ == "__main__":
     for process in processes:
         process.start_loop()
 
-    while True:
+    # run infinite loop until all processes are stopped
+    while not all([p.stop_worker.is_set() for p in processes]):
         pass
