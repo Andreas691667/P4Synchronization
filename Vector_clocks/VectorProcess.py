@@ -1,6 +1,6 @@
 from queue import Queue, Empty
 from threading import Event, Thread
-from time import time
+import time
 import random
 
 class VectorProcess:
@@ -11,12 +11,13 @@ class VectorProcess:
         self.stop_worker = Event()
         self.message_queue = Queue()    #queue of incoming message (payload, timestamp)
         self.events_queue = Queue()     #queue of tuples: (payload, time)
-        self.current_time = 0
+        self.start_time = 0
         self.clock = [0] * n            #vector clock initialized to 0
 
     def start_loop(self):
         """Start the process loop"""
-        self.current_time = time.time()
+        self.start_time = time.time()
+        print(f"Process {self._id} started")
         self.main_thread.start()
 
     def get_process(self, _id):
@@ -30,10 +31,11 @@ class VectorProcess:
     def main_loop(self):
         """Main loop for the process"""
         while not self.stop_worker.is_set():
+            time_delta = time.time() - self.start_time
             # Check event queue for events
             if not self.events_queue.empty():
                 event_time, event_payload = self.events_queue.queue[0]
-                if (self.current_time >= event_time):
+                if (time_delta >= event_time):
                     # Remove element
                     self.events_queue.get()
                     # Call send message with event and timestamp
@@ -52,14 +54,11 @@ class VectorProcess:
             else:
                 self.receive_message(payload, clock_in) 
 
-            self.current_time = time.time()
-
-
     def receive_message(self, payload, timestamp):
         """Receive message from another process"""
         self.clock[self._id] += 1
         # update clock by taking elementwise max
-        for i, clock_old in enumerate(len(self.clock)):
+        for i, clock_old in enumerate(self.clock):
             self.clock[i] = max(clock_old, timestamp[i])
 
         print(f"Process {self._id} received message {payload} with timestamp {timestamp}")
