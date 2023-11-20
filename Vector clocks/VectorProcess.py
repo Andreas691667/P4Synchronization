@@ -1,11 +1,11 @@
 from queue import Queue, Empty
 from threading import Event, Thread
 from time import time
+import random
 
 class VectorProcess:
     def __init__(self, _id, n):
         self._id = _id
-        self.no_processes = n
         self.processes = []
         self.main_thread = Thread(target=self.main_loop, daemon=True)
         self.stop_worker = Event()
@@ -13,8 +13,9 @@ class VectorProcess:
         self.events_queue = Queue()     #queue of tuples: (payload, time)
         self.current_time = 0
         self.clock = [0] * n            #vector clock initialized to 0
-        
+
     def start_loop(self):
+        """Start the process loop"""
         self.current_time = time.time()
         self.main_thread.start()
 
@@ -27,6 +28,7 @@ class VectorProcess:
         self.message_queue.put((payload, timestamp))
 
     def main_loop(self):
+        """Main loop for the process"""
         while not self.stop_worker.is_set():
             # Check event queue for events
             if not self.events_queue.empty():
@@ -54,9 +56,20 @@ class VectorProcess:
 
 
     def receive_message(self, payload, timestamp):
-        pass
+        """Receive message from another process"""
+        self.clock[self._id] += 1
+        # update clock by taking elementwise max
+        for i, clock_old in enumerate(len(self.clock)):
+            self.clock[i] = max(clock_old, timestamp[i])
+
+        print(f"Process {self._id} received message {payload} with timestamp {timestamp}")
     
     def send_message(self, payload, timestamp):
+        """Send message to another process"""
         self.clock[self._id] += 1
+        # send message to random process
+        process : VectorProcess = random.choice(self.processes)
+        process.enqueue_message(payload, timestamp)
+        print(f"Process {self._id} sent message {payload} with timestamp {timestamp} to process {process._id}")
 
     
