@@ -4,15 +4,16 @@ sys.path.insert(0, "./Vector_clocks")
 from VectorProcess import VectorProcess
 
 if __name__ == "__main__":
-    N = 2  # Number of processes
+    N = 3  # Number of processes
     # Create processes
     processes = [VectorProcess(i, N) for i in range(N)]
 
     # create events for processes
-    terminate_event = (15, "STOP", -1)  # Event to stop the processes
-    events0 = [(5, "event1", 1), (10, "event2", 1)]
-    events1 = [(6, "event3", 0), (11, "event4", 0)]
-    E = [events0, events1]
+    terminate_event = (12, "STOP", -1)  # Event to stop the processes
+    events0 = [(1, "event1", 0), (6, "event6", 1)]
+    events1 = [(2, "event2", 1), (3, "event3", 0), (8, "event8", 2)]
+    events2 = [(5, "event5", 2)]
+    E = [events0, events1, events2]
 
     for i, e in enumerate(E):
         for ei in e:

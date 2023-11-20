@@ -19,7 +19,7 @@ class VectorProcess:
     def start_loop(self) -> None:
         """Start the process loop"""
         self.start_time = time.time()
-        print(f"[{time.time()-self.start_time}] Process {self._id} started")
+        print(f"INIT [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}]")
         self.main_thread.start()
 
     def get_process(self, _id) -> "VectorProcess":
@@ -41,7 +41,7 @@ class VectorProcess:
                     # Remove element
                     self.events_queue.get()
                     # Call send message with event and timestamp
-                    self.send_message(event_payload, out_id)
+                    self.handle_event(event_payload, out_id)
 
             # Check for incoming messages
             try:
@@ -65,19 +65,29 @@ class VectorProcess:
             self.clock[i] = max(clock_old, timestamp[i])
 
         print(
-            f"[{time.time()-self.start_time}] Process {self._id} received message {payload} and clock is now: {self.clock} \n"
+            f"""RECEIVE [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}] \n"""
         )
 
-    def send_message(self, payload, out_id) -> None:
-        """Send message to another process"""
+    def handle_event(self, payload, out_id) -> None:
+        """Handle event"""
         if payload == "STOP":
             self.stop_worker.set()
             return
+        elif out_id == self._id:
+            self.clock[self._id] += 1
+            print(
+                f"""LOCAL [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}]\n"""
+            )
+            return
+        else:
+            self.clock[self._id] += 1
+            self.send_message(payload, out_id)
 
-        self.clock[self._id] += 1
+    def send_message(self, payload, out_id) -> None:
+        """Send message to another process"""
         # send message to random process
         process: VectorProcess = self.get_process(out_id)
         process.enqueue_message(payload, self.clock)
         print(
-            f"[{time.time()-self.start_time}] Process {self._id} sent message {payload} with clock: {self.clock} to process {out_id} \n"
+            f"""SEND [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}] \n"""
         )
