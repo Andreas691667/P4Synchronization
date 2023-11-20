@@ -11,6 +11,7 @@ class LamportProcess:
         self.events_queue = Queue()     #queue of tuples: (time, payload)
         self.current_time = 0
         self.clock = None
+        self.processes = []
         
     def start_loop(self):
         self.current_time = time.time()
