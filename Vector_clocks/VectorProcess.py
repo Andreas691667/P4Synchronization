@@ -10,14 +10,14 @@ class VectorProcess:
         self.main_thread = Thread(target=self.main_loop, daemon=True)
         self.stop_worker = Event()
         self.message_queue = Queue()    #queue of incoming message (payload, timestamp)
-        self.events_queue = Queue()     #queue of tuples: (payload, time)
+        self.events_queue = Queue()     #queue of tuples: (payload, receiver_id, time)
         self.start_time = 0
         self.clock = [0] * n            #vector clock initialized to 0
 
     def start_loop(self):
         """Start the process loop"""
         self.start_time = time.time()
-        print(f"Process {self._id} started")
+        print(f"[{time.time()-self.start_time}] Process {self._id} started")
         self.main_thread.start()
 
     def get_process(self, _id):
@@ -34,12 +34,12 @@ class VectorProcess:
             time_delta = time.time() - self.start_time
             # Check event queue for events
             if not self.events_queue.empty():
-                event_time, event_payload = self.events_queue.queue[0]
+                event_time, event_payload, out_id = self.events_queue.queue[0]
                 if (time_delta >= event_time):
                     # Remove element
                     self.events_queue.get()
                     # Call send message with event and timestamp
-                    self.send_message(event_payload, self.clock)
+                    self.send_message(event_payload, out_id)
         
 
             # Check for incoming messages
@@ -61,14 +61,19 @@ class VectorProcess:
         for i, clock_old in enumerate(self.clock):
             self.clock[i] = max(clock_old, timestamp[i])
 
-        print(f"Process {self._id} received message {payload} with timestamp {timestamp}")
+        print(f"[{time.time()-self.start_time}] Process {self._id} received message {payload} and clock is now: {self.clock} \n")
     
-    def send_message(self, payload, timestamp):
+    def send_message(self, payload, out_id):
         """Send message to another process"""
+        if payload == "STOP":
+            print(f"Process {self._id} stopped")
+            self.stop_worker.set()
+            return
+
         self.clock[self._id] += 1
         # send message to random process
-        process : VectorProcess = random.choice(self.processes)
-        process.enqueue_message(payload, timestamp)
-        print(f"Process {self._id} sent message {payload} with timestamp {timestamp} to process {process._id}")
+        process : VectorProcess = self.get_process(out_id)
+        process.enqueue_message(payload, self.clock)
+        print(f"[{time.time()-self.start_time}] Process {self._id} sent message {payload} with clock: {self.clock} to process {out_id} \n")
 
     
