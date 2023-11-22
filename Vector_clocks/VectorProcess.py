@@ -16,6 +16,10 @@ class VectorProcess:
         self.start_time: float = 0
         self.clock = [0] * n  # vector clock initialized to 0
 
+    def set_processes(self, processes) -> None:
+        """Set processes"""
+        self.processes = processes
+
     def start_loop(self) -> None:
         """Start the process loop"""
         self.start_time = time.time()

@@ -21,7 +21,7 @@ if __name__ == "__main__":
         processes[i].events_queue.put(terminate_event)
 
     for process in processes:
-        process.processes = processes
+        process.set_processes(processes)
 
     for process in processes:
         process.start_loop()
