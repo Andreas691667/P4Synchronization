@@ -1,0 +1,44 @@
+@startuml classes
+set namespaceSeparator none
+class "LamportProcess" as Lamport_timestamps.LamportProcess.LamportProcess {
+  _id
+  events_queue : Queue
+  log : list
+  main_thread : Thread
+  message_queue : Queue
+  processes : list[LamportProcess]
+  start_time
+  stop_worker : Event
+  time_stamp : int
+  __init__(_id)
+  enqueue_message(payload, timestamp)
+  get_time_in_ms()
+  inject_events(events: Queue) -> None
+  main_loop()
+  receive_message(payload, timestamp)
+  send_message(to_process, payload)
+  set_processes(processes) -> None
+  start_loop(start_time)
+}
+
+class "VectorProcess" as Vector_clocks.VectorProcess.VectorProcess {
+  _id : int
+  clock : list
+  events_queue : Queue
+  main_thread : Thread
+  message_queue : Queue
+  processes : list
+  start_time : float
+  stop_worker : Event
+  __init__(_id, n)
+  enqueue_message(payload, timestamp) -> None
+  get_process(_id) -> 'VectorProcess'
+  handle_event(payload, out_id) -> None
+  main_loop() -> None
+  receive_message(payload, timestamp) -> None
+  send_message(payload, out_id) -> None
+  set_processes(processes) -> None
+  start_loop() -> None
+}
+@enduml
+

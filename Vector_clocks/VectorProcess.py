@@ -7,14 +7,14 @@ class VectorProcess:
     """Process class that uses vector clocks"""
 
     def __init__(self, _id, n):
-        self._id = _id
+        self._id : int = _id
         self.processes = []
         self.main_thread = Thread(target=self.main_loop, daemon=True)
         self.stop_worker = Event()
         self.message_queue = Queue()  # queue of incoming message (payload, timestamp)
         self.events_queue = Queue()  # queue of tuples: (payload, receiver_id, time)
         self.start_time: float = 0
-        self.clock = [0] * n  # vector clock initialized to 0
+        self.clock : list = [0] * n  # vector clock initialized to 0
 
     def set_processes(self, processes) -> None:
         """Set processes"""
