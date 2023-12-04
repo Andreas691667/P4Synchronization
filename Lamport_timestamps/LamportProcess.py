@@ -30,12 +30,11 @@ class LamportProcess:
         while not self.stop_worker.is_set():
             # Check event queue for events
             if not self.events_queue.empty():
-                time_delta = self.get_time_in_ms() - self.start_time
+                time_delta = self.get_time()
                 (
                     event_time,
-                    from_process,
-                    to_process,
                     event_payload,
+                    to_process
                 ) = self.events_queue.queue[0]
                 if time_delta >= event_time:
                     # Remove element
@@ -56,18 +55,14 @@ class LamportProcess:
             else:
                 self.receive_message(payload, clock_in)
 
-    def get_time_in_ms(self):
-        return time.time_ns() / 10**6
+    def get_time(self):
+        return time.time() - self.start_time
 
     def receive_message(self, payload, timestamp):
         """Called upon recieving a message"""
         # update timestamp
-        old_ts = self.clock
-        time_delta = round(self.get_time_in_ms() - self.start_time)
-        self.clock = max(timestamp, self.clock) + 1
-        print(
-            f"{time_delta}: Process {self._id} recieved msg: {payload} \n Timestamp update: {old_ts} -> {self.clock} \n"
-        )
+        self.clock = max(timestamp + 1 , self.clock + 1)
+        self.print_event("RECEIVE", payload, self.get_time())
 
     def enqueue_message(self, payload, clock):
         self.message_queue.put((payload, clock))
@@ -75,6 +70,7 @@ class LamportProcess:
     def send_message(self, to_process, payload):
         # Send to the other process
         self.processes[to_process].enqueue_message(payload, self.clock)
+        self.print_event("SEND", payload, self.get_time())
 
     def handle_event(self, payload, out_id) -> None:
         """Handle event"""
@@ -86,14 +82,21 @@ class LamportProcess:
         # Local event
         elif out_id == self._id:
             self.increment_clock()
-            print(
-                f"""LOCAL [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}]\n"""
-            )
+            self.print_event("LOCAL", payload, self.get_time())
             return
-        # Send
+        
+        # Send event
         else:
             self.increment_clock()
-            self.send_message(payload, out_id)
+            self.send_message(out_id, payload)
     
     def increment_clock(self):
         self.clock += 1
+
+    def print_event(
+        self, event_type: str, event_payload: str, event_time: float
+    ) -> None:
+        """Print event"""
+        print(
+            f"""{event_type} event [T: {time.time()-self.start_time}], [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {event_time}] \n"""
+        )

@@ -1,6 +1,6 @@
 from LamportProcess import LamportProcess
 from queue import Queue, Empty
-from time import sleep, time_ns
+from time import sleep, time
 
 
 def main():
@@ -21,9 +21,10 @@ def main():
     e0 = Queue()
     e1 = Queue()
     e2 = Queue()
-    e0_list = [(500, 0, 1, "0->1"), (1500, 0, 2, "0->2")]  # (time, from, to, payload)
-    e1_list = [(1000, 1, 2, "1->2"), (3000, 1, 0, "1->0")]
-    e2_list = [(2000, 2, 0, "2->0"), (2500, 2, 1, "2->1")]
+    terminate_event = (12, "STOP", -1)  # Event to stop the processes
+    e0_list = [(1, "e1", 0), (6, "e6", 1), terminate_event]
+    e1_list = [(2, "e2", 1), (3, "e3", 0), (8, "e8", 2), (11, "e10", 1), terminate_event]
+    e2_list = [(5, "e5", 2), (9, "e11", 2), terminate_event]
     list(map(e0.put, e0_list))  # Put elements into the queue
     list(map(e1.put, e1_list))  # Put elements into the queue
     list(map(e2.put, e2_list))  # Put elements into the queue
@@ -32,14 +33,12 @@ def main():
     processes[2].inject_events(e2)
 
     # --- Start Threads ---
-    start_time = time_ns() / 10**6
+    start_time = time()
     for index, id in enumerate(ids):
         processes[index].start_loop(start_time)
 
     # Run threads for 1 second
-    sleep(5)
-
-    # --- Print results ---
+    sleep(15)
 
 
 if __name__ == "__main__":
