@@ -31,11 +31,7 @@ class LamportProcess:
             # Check event queue for events
             if not self.events_queue.empty():
                 time_delta = self.get_time()
-                (
-                    event_time,
-                    event_payload,
-                    to_process
-                ) = self.events_queue.queue[0]
+                (event_time, event_payload, to_process) = self.events_queue.queue[0]
                 if time_delta >= event_time:
                     # Remove element
                     self.events_queue.get()
@@ -61,7 +57,7 @@ class LamportProcess:
     def receive_message(self, payload, timestamp):
         """Called upon recieving a message"""
         # update timestamp
-        self.clock = max(timestamp + 1 , self.clock + 1)
+        self.clock = max(timestamp + 1, self.clock + 1)
         self.print_event("RECEIVE", payload, self.get_time())
 
     def enqueue_message(self, payload, clock):
@@ -78,18 +74,18 @@ class LamportProcess:
         if payload == "STOP":
             self.stop_worker.set()
             return
-        
+
         # Local event
         elif out_id == self._id:
             self.increment_clock()
             self.print_event("LOCAL", payload, self.get_time())
             return
-        
+
         # Send event
         else:
             self.increment_clock()
             self.send_message(out_id, payload)
-    
+
     def increment_clock(self):
         self.clock += 1
 
@@ -98,5 +94,5 @@ class LamportProcess:
     ) -> None:
         """Print event"""
         print(
-            f"""{event_type} event [T: {time.time()-self.start_time}], [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {event_time}] \n"""
+            f"""{event_type} event [T: {time.time()-self.start_time}], [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {round(event_time, 2)}] \n"""
         )
