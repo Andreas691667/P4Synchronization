@@ -94,5 +94,5 @@ class LamportProcess:
     ) -> None:
         """Print event"""
         print(
-            f"""{event_type} event [T: {time.time()-self.start_time}], [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {round(event_time, 2)}] \n"""
+            f"""{event_type} event [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {round(event_time, 2)}] \n"""
         )
