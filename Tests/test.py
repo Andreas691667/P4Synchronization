@@ -10,9 +10,9 @@ if __name__ == "__main__":
 
     # create events for processes
     terminate_event = (12, "STOP", -1)  # Event to stop the processes
-    events0 = [(1, "event1", 0), (6, "event6", 1)]
-    events1 = [(2, "event2", 1), (3, "event3", 0), (8, "event8", 2)]
-    events2 = [(5, "event5", 2)]
+    events0 = [(1, "e1", 0), (6, "e6", 1)]
+    events1 = [(2, "e2", 1), (3, "e3", 0), (8, "e8", 2), (11, "e10", 1)]
+    events2 = [(5, "e5", 2), (9, "e11", 2)]
     E = [events0, events1, events2]
 
     for i, e in enumerate(E):
