@@ -37,7 +37,7 @@ class VectorProcess:
     def main_loop(self) -> None:
         """Main loop for the process"""
         while not self.stop_worker.is_set():
-            time_delta = time.time() - self.start_time
+            time_delta = self.get_time()
             # Check event queue for events
             if not self.events_queue.empty():
                 event_time, event_payload, out_id = self.events_queue.queue[0]
