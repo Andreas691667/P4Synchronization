@@ -47,7 +47,7 @@ class LamportProcess:
             except Empty:
                 pass
 
-            # Not empy
+            # Not empty
             else:
                 self.receive_message(payload, clock_in)
 

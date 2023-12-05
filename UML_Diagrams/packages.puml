@@ -1,0 +1,7 @@
+@startuml packages
+set namespaceSeparator none
+package "Lamport_timestamps" as Lamport_timestamps {
+}
+package "Lamport_timestamps.LamportProcess" as Lamport_timestamps.LamportProcess {
+}
+@enduml

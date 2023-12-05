@@ -1,0 +1,24 @@
+@startuml classes
+set namespaceSeparator none
+class "VectorProcess" as Vector_clocks.VectorProcess.VectorProcess {
+  _id : int
+  clock : list
+  events_queue : Queue
+  main_thread : Thread
+  message_queue : Queue
+  processes : list
+  start_time : float
+  stop_worker : Event
+  __init__(_id, n)
+  enqueue_message(payload, timestamp) -> None
+  get_process(_id) -> 'VectorProcess'
+  get_time() -> float
+  handle_event(payload, out_id) -> None
+  main_loop() -> None
+  print_event(event_type: str, event_payload: str, event_time: float) -> None
+  receive_message(payload, timestamp) -> None
+  send_message(payload, out_id) -> None
+  set_processes(processes) -> None
+  start_loop() -> None
+}
+@enduml
