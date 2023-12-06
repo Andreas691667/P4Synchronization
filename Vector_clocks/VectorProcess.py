@@ -24,9 +24,6 @@ class VectorProcess:
         """Start the process loop"""
         self.start_time = time.time()
         self.print_event("INIT", "INIT", self.get_time())
-        # print(
-        #     f"INIT [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}]"
-        # )
         self.main_thread.start()
 
     def get_process(self, _id) -> "VectorProcess":
@@ -40,7 +37,7 @@ class VectorProcess:
     def main_loop(self) -> None:
         """Main loop for the process"""
         while not self.stop_worker.is_set():
-            time_delta = time.time() - self.start_time
+            time_delta = self.get_time()
             # Check event queue for events
             if not self.events_queue.empty():
                 event_time, event_payload, out_id = self.events_queue.queue[0]
@@ -72,9 +69,6 @@ class VectorProcess:
             self.clock[i] = max(clock_old, timestamp[i])
 
         self.print_event("RECEIVE", payload, self.get_time())
-        # print(
-        #     f"""RECEIVE [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}] \n"""
-        # )
 
     def handle_event(self, payload, out_id) -> None:
         """Handle event"""
@@ -84,9 +78,6 @@ class VectorProcess:
         elif out_id == self._id:
             self.clock[self._id] += 1
             self.print_event("LOCAL", payload, self.get_time())
-            # print(
-            #     f"""LOCAL [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}]\n"""
-            # )
             return
         else:
             self.clock[self._id] += 1
@@ -94,13 +85,9 @@ class VectorProcess:
 
     def send_message(self, payload, out_id) -> None:
         """Send message to another process"""
-        # send message to random process
         process: VectorProcess = self.get_process(out_id)
         process.enqueue_message(payload, self.clock)
         self.print_event("SEND", payload, self.get_time())
-        # print(
-        #     f"""SEND [T: {time.time()-self.start_time}], [ID: {self._id}], [C: {self.clock}] \n"""
-        # )
 
     def get_time(self) -> float:
         """Get time in ms"""
@@ -111,5 +98,5 @@ class VectorProcess:
     ) -> None:
         """Print event"""
         print(
-            f"""{event_type} event [T: {time.time()-self.start_time}], [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {event_time}] \n"""
+            f"""{event_type} event [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {round(event_time,2)}] \n"""
         )

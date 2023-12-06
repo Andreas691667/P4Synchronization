@@ -46,7 +46,7 @@ class LamportProcess:
             except Empty:
                 pass
 
-            # Not empy
+            # Not empty
             else:
                 self.receive_message(payload, clock_in)
 
@@ -56,7 +56,7 @@ class LamportProcess:
     def receive_message(self, payload, timestamp):
         """Called upon recieving a message"""
         # update timestamp
-        self.clock = max(timestamp + 1 , self.clock + 1)
+        self.clock = max(timestamp + 1, self.clock + 1)
         self.print_event("RECEIVE", payload, self.get_time())
 
     def enqueue_message(self, payload, clock):
@@ -73,18 +73,18 @@ class LamportProcess:
         if payload == "STOP":
             self.stop_worker.set()
             return
-        
+
         # Local event
         elif out_id == self._id:
             self.increment_clock()
             self.print_event("LOCAL", payload, self.get_time())
             return
-        
+
         # Send event
         else:
             self.increment_clock()
             self.send_message(out_id, payload)
-    
+
     def increment_clock(self):
         self.clock += 1
 
@@ -93,5 +93,5 @@ class LamportProcess:
     ) -> None:
         """Print event"""
         print(
-            f"""{event_type} event [T: {time.time()-self.start_time}], [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {event_time}] \n"""
+            f"""{event_type} event [PROCESS_ID: {self._id}], [CLOCK: {self.clock}], [PAYLOAD: {event_payload}], [TIME: {round(event_time, 2)}] \n"""
         )
