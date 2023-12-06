@@ -31,17 +31,12 @@ class LamportProcess:
             # Check event queue for events
             if not self.events_queue.empty():
                 time_delta = self.get_time()
-                (
-                    event_time,
-                    event_payload,
-                    to_process
-                ) = self.events_queue.queue[0]
+                event_time, event_payload, out_id = self.events_queue.queue[0]
                 if time_delta >= event_time:
                     # Remove element
                     self.events_queue.get()
-
                     # Call send message with event and timestamp
-                    self.handle_event(event_payload, to_process)
+                    self.handle_event(event_payload, out_id)
 
             # Check for incomming messages
             try:
@@ -67,9 +62,9 @@ class LamportProcess:
     def enqueue_message(self, payload, clock):
         self.message_queue.put((payload, clock))
 
-    def send_message(self, to_process, payload):
+    def send_message(self, out_id, payload):
         # Send to the other process
-        self.processes[to_process].enqueue_message(payload, self.clock)
+        self.processes[out_id].enqueue_message(payload, self.clock)
         self.print_event("SEND", payload, self.get_time())
 
     def handle_event(self, payload, out_id) -> None:
